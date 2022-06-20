@@ -44,6 +44,7 @@ import { passwordResetNamespace as passwordResetEndpoints } from '../../../src/U
 import { issueJWT } from '../../../src/UserManagement/auth/jwt';
 import { getLogger } from '../../../src/Logger';
 import { credentialsController } from '../../../src/api/credentials.api';
+import { oauth2CredentialsController } from '../../../src/api/oauth2Credential.api';
 import { loadPublicApiVersions } from '../../../src/PublicApi/';
 import * as UserManagementMailer from '../../../src/UserManagement/email/UserManagementMailer';
 import type { User } from '../../../src/databases/entities/User';
@@ -100,6 +101,7 @@ export async function initTestServer({
 		const map: Record<string, express.Router | express.Router[]> = {
 			credentials: credentialsController,
 			publicApi: apiRouters,
+			oauth2Credential: oauth2CredentialsController,
 		};
 
 		for (const group of routerEndpoints) {
@@ -146,7 +148,7 @@ const classifyEndpointGroups = (endpointGroups: string[]) => {
 	const functionEndpoints: string[] = [];
 
 	endpointGroups.forEach((group) =>
-		(group === 'credentials' || group === 'publicApi' ? routerEndpoints : functionEndpoints).push(
+		(group === 'credentials' || group === 'publicApi' || group === 'oauth2-credential' ? routerEndpoints : functionEndpoints).push(
 			group,
 		),
 	);

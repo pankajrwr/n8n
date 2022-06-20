@@ -20,7 +20,7 @@ export type SmtpTestAccount = {
 
 export type ApiPath = 'internal' | 'public';
 
-type EndpointGroup = 'me' | 'users' | 'auth' | 'owner' | 'passwordReset' | 'credentials' | 'publicApi';
+type EndpointGroup = 'me' | 'users' | 'auth' | 'owner' | 'passwordReset' | 'credentials' | 'publicApi' | 'oauth2-credential';
 
 export type CredentialPayload = {
 	name: string;
