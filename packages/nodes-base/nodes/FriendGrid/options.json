@@ -1,0 +1,116 @@
+[
+	{
+		"displayName": "Resource",
+		"name": "resource",
+		"type": "options",
+		"options": [
+			{
+				"name": "Coupons",
+				"value": "coupons",
+			},
+			{
+				"name": "Transactions",
+				"value": "transactions",
+			},
+		],
+		"default": "coupons",
+		"required": true,
+		"description": "Resource to consume",
+	},
+	{
+		"displayName": "Operation",
+		"name": "operation",
+		"type": "options",
+		"displayOptions": {
+			"show": {
+				"resource": [
+					"coupons",
+				],
+			},
+		},
+		"options": [
+			{
+				"name": "All Coupons",
+				"value": "allCoupons",
+				"description": "Get all coupons",
+			},
+			{
+				"name": "Add New Coupon",
+				"value": "addNewCoupons",
+				"description": "Add New Coupons",
+			},
+		],
+		"default": "addNewCoupons",
+		"description": "The operation to perform.",
+	},
+	{
+		"displayName": "Name",
+		"name": "name",
+		"type": "string",
+		"required": true,
+		"displayOptions": {
+			"show": {
+				"operation": [
+					"addNewCoupons",
+				],
+				"resource": [
+					"coupons",
+				],
+			},
+		},
+		"default":"",
+		"description":"Name of the coupon",
+	},
+	{
+		"displayName": "Type",
+		"name": "coupon_discount_type",
+		"type": "options",
+		"options": [
+			{
+				"name": "Quantity Amount",
+				"value": "quantity_amount",
+			},
+		],
+		"required": true,
+		"displayOptions": {
+			"show": {
+				"operation": [
+					"addNewCoupons",
+				],
+				"resource": [
+					"coupons",
+				],
+			},
+		},
+		"default":"",
+		"description":"Name of the coupon",
+	},
+	{
+		"displayName": "Number of Uses",
+		"name": "number_of_uses_allowed",
+		"type": "options",
+		"options": [
+			{
+				"name": "100",
+				"value": "100",
+			},
+			{
+				"name": "50",
+				"value": "50",
+			},
+		],
+		"required": true,
+		"displayOptions": {
+			"show": {
+				"operation": [
+					"addNewCoupons",
+				],
+				"resource": [
+					"coupons",
+				],
+			},
+		},
+		"default":"",
+		"description":"Name of the coupon",
+	},
+]

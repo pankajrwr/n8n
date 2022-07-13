@@ -237,8 +237,9 @@ export class MySql implements INodeType {
 				baseCredentials.ssl.key = clientPrivateKey;
 			}
 		}
-
+console.log('mysql cred:', baseCredentials);
 		const connection = await mysql2.createConnection(baseCredentials);
+		console.log('connection:', connection);
 		const items = this.getInputData();
 		const operation = this.getNodeParameter('operation', 0) as string;
 		let returnItems = [];
@@ -294,8 +295,9 @@ export class MySql implements INodeType {
 
 				const insertSQL = `INSERT ${insertPriority || ''} ${insertIgnore ? 'IGNORE' : ''} INTO ${table}(${columnString}) VALUES ${items.map(item => insertPlaceholder).join(',')};`;
 				const queryItems = insertItems.reduce((collection, item) => collection.concat(Object.values(item as any)), []); // tslint:disable-line:no-any
-
-				const queryResult = await connection.query(insertSQL, queryItems);
+				console.log('insertSQL:', insertSQL)
+				console.log('queryItems:', queryItems)
+				const queryResult = await connection.query(insertSQL, [1, 'hello']);
 
 				returnItems = this.helpers.returnJsonArray(queryResult[0] as unknown as IDataObject);
 			} catch (error) {
