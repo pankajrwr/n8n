@@ -425,6 +425,7 @@
       "dist/nodes/Formstack/FormstackTrigger.node.js",
       "dist/nodes/FriendGrid/FriendGrid.node.js",
       "dist/nodes/FoxyApi/FoxyApi.node.js",
+      "dist/nodes/FoxyApi/FoxyTrigger.node.js",
       "dist/nodes/Freshdesk/Freshdesk.node.js",
       "dist/nodes/Freshservice/Freshservice.node.js",
       "dist/nodes/FreshworksCrm/FreshworksCrm.node.js",

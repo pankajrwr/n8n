@@ -4,7 +4,7 @@ import {
 
 import mysql2 from 'mysql2/promise';
 import { Coupons } from './couponFunctions';
-
+import axios from 'axios';
 import {
 	BINARY_ENCODING,
 	IExecuteFunctions,
@@ -95,120 +95,69 @@ export async function handleExecute(fns: IExecuteFunctions){
 		downloadables: 'downloadablesOperation',
 	};
 
-	const resource = fns.getNodeParameter('resource', 0) as string;
-	const operationName = operationMap[resource as keyof OperationMap];
-	const operation = fns.getNodeParameter(operationName, 0) as string;
+	type Headers = {
+		'FOXY-API-VERSION'?: number;
+		Authorization?: string;
+		'Content-Type'?: string;
+	};
 
-	console.log('resource:', resource);
-	console.log('operation:', operation);
+	type Config = {
+		headers?: Headers,
+		params?: object;
+		data?: object;
+	};
 
-	const foxySDK = require('@foxy.io/sdk');
-	const api = new foxySDK.Backend.API({
-		refreshToken: 'UIBRufC4TmSSQYbaVCqasAQgdGhEaBzAfGJS4dIg',
-		clientSecret: 'wuwy5XRD86luAzmKvl7X65sSGL8Q9V6sxF4yF22l',
-		clientId: 'client_j5Mbyv82R2BrZu67ibvw',
-	});
+	const config: Config = {};
+	config.headers = {
+		'FOXY-API-VERSION': 1,
+		'Authorization': 'Bearer 93eb7450494a40dfe966d243c6a9721c9c2bdf74',
+		'Content-Type': 'application/json',
+	};
 
-	if(resource === 'coupons'){
+	const url = fns.getNodeParameter('url', 0) as string;
+	// const operationName = operationMap[resource as keyof OperationMap];
+	const method = fns.getNodeParameter('method', 0) as string;
+
+	let query;
 
 
-
-		const couponsNode = api.follow('fx:store').follow('fx:coupons');
-		if(operation === 'allCoupons'){
-			const couponClass = new Coupons(fns);
-			console.log('calling from class')
-			const allCouponCodes = await couponClass[operation]();
-
-			return allCouponCodes;
-			// Coupons.execute()
-			// const allCouponCodesResponse = await couponsNode.get();
-			// const allCouponCodes = await allCouponCodesResponse.json();
-			// return allCouponCodes;
-		}
-		if(operation === 'addNewCoupons'){
-			const name = fns.getNodeParameter('name', 0) as string;
-			const couponDiscountType = fns.getNodeParameter('coupon_discount_type', 0) as string;
-			const numberOfUsesAllowed = fns.getNodeParameter('number_of_uses_allowed', 0) as string;
-			const addCouponResponse = await couponsNode.post({
-				name,
-				coupon_discount_type: couponDiscountType,
-				number_of_uses_allowed: numberOfUsesAllowed,
-				'coupon_discount_details': '5-6',
-				'combinable': false
-			});
-			const addNewCouponCode = await addCouponResponse.json();
-			return addNewCouponCode;
-		}
-	}
-	if(resource === 'transactions'){
-		const transactionsNode = api.follow('fx:store').follow('fx:transactions');
-			if(operation === 'allTransactions'){
-				const allTransactionsResponse = await transactionsNode.get();
-				const allTransactions = await allTransactionsResponse.json();
-				return allTransactions;
+	if(method === 'get'){
+		query = fns.getNodeParameter('query', 0, null) as string;
+		// console.log('query:', query);
+		if(query){ console.log('in with ', query);
+			try {
+				config.params = JSON.parse('{"' + decodeURI(query.replace(/&/g, '\",\"').replace(/=/g,'\":\"')) + '"}');
 			}
-			if(operation === 'transactionsFilteredByOrderTotal'){
-
-				const orderTotal = fns.getNodeParameter('orderTotal', 0) as string;
-				const zoom = fns.getNodeParameter('zoom', 0) as string;
-
-				const filteredTransactionsResponse = await transactionsNode.get({ order_total: orderTotal, zoom: [zoom] });
-				const filteredTransactions = await filteredTransactionsResponse.json();
-				return filteredTransactions;
+			catch (err){
+				console.log('Error: ', err);
 			}
-	}
-	if(resource === 'subscriptions'){
-		const subscriptionNode = api.follow('fx:store').follow('fx:subscriptions');
-		if(operation === 'allSubscriptions'){
-			const subscriptionResponse = await subscriptionNode.get();
-			const appSubscription = await subscriptionResponse.json();
-			return appSubscription;
 		}
 	}
-	if(resource === 'cart'){
-		const cartNode = api.follow('fx:store').follow('fx:carts');
-		if(operation === 'createCart'){
-			const cartResponse = await cartNode.post();
-			const cart = await cartResponse.json();
-			return cart;
-		}
+	let body: object;
+	if(method === 'post'){
+		body = JSON.parse(fns.getNodeParameter('body', 0) as string);
 	}
-	if(resource === 'customers'){
-		const customersNode = api.follow('fx:store').follow('fx:customers');
-		if(operation === 'allCustomers'){
-			const customersResponse = await customersNode.get();
-			const customers = await customersResponse.json();
-			return customers;
-		}
-		if(operation === 'allNonGuestCustomers'){
-			const nonGuestcustomersResponse = await customersNode.get({is_anonymous: 0});
-			const nonGuestCustomers = await nonGuestcustomersResponse.json();
-			return nonGuestCustomers;
-		}
-	}
-	if(resource === 'downloadables'){
-		const downloadablesNode = api.follow('fx:store').follow('fx:downloadables');
-		if(operation === 'allDownloadables'){
-			const downloadablesResponse = await downloadablesNode.get();
-			const downloadables = await downloadablesResponse.json();
-			return downloadables;
-		}
-		if(operation === 'addNewDownloadable'){
-			const downloadableName = fns.getNodeParameter('downloadableName', 0) as string;
-			const downloadableCode = fns.getNodeParameter('downloadableCode', 0) as string;
-			const downloadablePrice = fns.getNodeParameter('downloadablePrice', 0) as string;
-			const itemCategoryURI = fns.getNodeParameter('itemCategoryURI', 0) as string;
+	console.log('resource:', url);
+	console.log('method:', method);
+	console.log('config', config);
+	// console.log('body:', body)
 
-			const addDownloadablesResponse = await downloadablesNode.post({
-				name: downloadableName,
-				code: downloadableCode,
-				price: downloadablePrice,
-				item_category_uri: itemCategoryURI,
-			});
-			const addDownloadables = await addDownloadablesResponse.json();
-			return addDownloadables;
-		}
-	}
+	const aresponse = await axios['get'](url,  config).then((response) => response.data );
+
+	console.log('aresponse:', aresponse);
+	return aresponse;
+	// const response = url.get();
+	// const foxySDK = require('@foxy.io/sdk');
+	// const api = new foxySDK.Backend.API
+	// 	.API({
+	// 	refreshToken: 'UIBRufC4TmSSQYbaVCqasAQgdGhEaBzAfGJS4dIg',
+	// 	clientSecret: 'wuwy5XRD86luAzmKvl7X65sSGL8Q9V6sxF4yF22l',
+	// 	clientId: 'client_j5Mbyv82R2BrZu67ibvw',
+	// });
+
+	// api.get()
+
+
 }
 
 async function createRedisConnection(){
@@ -247,9 +196,9 @@ console.log('settingup');
 	}
 
 }
-
-class testClass{
-	changeColor(color: any) {
-		console.log(color)
-	}
-}
+//
+// class testClass{
+// 	changeColor(color: any) {
+// 		console.log(color)
+// 	}
+// }
