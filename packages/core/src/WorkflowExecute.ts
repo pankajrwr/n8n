@@ -685,7 +685,7 @@ export class WorkflowExecute {
 
 		const workflowIssues = workflow.checkReadyForExecution({ startNode, destinationNode });
 		if (workflowIssues !== null) {
-			console.log('workflowIssues:', workflowIssues);
+			console.log('workflowIssues:', workflowIssues.FoxyApi);
 			throw new Error(
 				'The workflow has issues and can for that reason not be executed. Please fix them first.',
 			);

@@ -5,8 +5,9 @@ export const uiProperties = [
 		displayName: 'URL',
 		name: 'url',
 		type: 'string',
+		default: '',
 		placeholder: 'Resource URL',
-		required: false,
+		required: true,
 		description: 'Resource URL',
 	},
 	{
@@ -61,6 +62,7 @@ export const uiProperties = [
 			show: {
 				method: [
 					'post',
+					'patch',
 					'put',
 				],
 			},

@@ -2,6 +2,8 @@ import {
 	OptionsWithUri,
 } from 'request';
 
+import { AxiosRequestConfig } from 'axios';
+
 import mysql2 from 'mysql2/promise';
 import { Coupons } from './couponFunctions';
 import axios from 'axios';
@@ -73,6 +75,51 @@ export async function freshdeskApiRequestAllItems(this: IExecuteFunctions | ILoa
 
 export async function handleExecute(fns: IExecuteFunctions){
 
+	const foxySDK = require('@foxy.io/sdk');
+	const foxyApi = new foxySDK.Backend.API({
+		refreshToken: 'UIBRufC4TmSSQYbaVCqasAQgdGhEaBzAfGJS4dIg',
+		clientSecret: 'wuwy5XRD86luAzmKvl7X65sSGL8Q9V6sxF4yF22l',
+		clientId: 'client_j5Mbyv82R2BrZu67ibvw',
+	});
+
+	type Options = {
+		method?: string,
+		body?: string,
+		headers?: object,
+	};
+
+	type Method = 'get' | 'post' | 'delete' | 'patch' | 'put' ;
+
+	const options: Options = {
+		headers: {
+			'FOXY-API-VERSION': 1,
+			'Content-Type': 'application/json',
+		},
+	};
+
+	let url = fns.getNodeParameter('url', 0) as string;
+	const method =  fns.getNodeParameter('method', 0) as Method;
+	options.method = method;
+
+	let query;
+	if(method.toUpperCase() === 'GET'){
+
+		query = fns.getNodeParameter('query', 0, null) as string;
+		if(query){
+			// config.params = JSON.parse('{"' + decodeURI(query.replace(/&/g, '\",\"').replace(/=/g,'\":\"')) + '"}');
+			url += query;
+		}
+	}
+	if(method.toUpperCase() === 'POST' || method.toUpperCase() === 'PATCH' || method.toUpperCase() === 'PUT'){
+		options.body = fns.getNodeParameter('body', 0) as string;
+	}
+
+	const foxyResponse = await foxyApi.fetch(url, options)
+	.then((response: { json: () => any; }) => response.json())
+	.then((data: any) => data);
+
+	return foxyResponse;
+
 	// console.log(fns);
 	// const credentials = await fns.getCredentials('redis');
 	// const a = await createRedisConnection();
@@ -105,47 +152,65 @@ export async function handleExecute(fns: IExecuteFunctions){
 		headers?: Headers,
 		params?: object;
 		data?: object;
+		url?: string;
+		method?: string;
 	};
 
-	const config: Config = {};
-	config.headers = {
+
+
+	// const config: Config = {};
+	const headers: Headers = {
 		'FOXY-API-VERSION': 1,
-		'Authorization': 'Bearer 93eb7450494a40dfe966d243c6a9721c9c2bdf74',
+		'Authorization': 'Bearer 3f1eaee1ec9237ff8bc47be9a5705bafdb8c0fdd',
 		'Content-Type': 'application/json',
 	};
 
-	const url = fns.getNodeParameter('url', 0) as string;
+	const config: AxiosRequestConfig = {};
+
+	// const options: Options = {};
+
+	// const url = fns.getNodeParameter('url', 0) as string;
+
+	config.url = url;
+	config.headers =headers;
+	// const accessToken = foxyApi.getToken();
+	// const response = await foxyApi.fetch(url, {
+	// 	method: 'GET',
+	// })
+	// return response;
 	// const operationName = operationMap[resource as keyof OperationMap];
-	const method = fns.getNodeParameter('method', 0) as string;
-
-	let query;
 
 
-	if(method === 'get'){
-		query = fns.getNodeParameter('query', 0, null) as string;
-		// console.log('query:', query);
-		if(query){ console.log('in with ', query);
-			try {
-				config.params = JSON.parse('{"' + decodeURI(query.replace(/&/g, '\",\"').replace(/=/g,'\":\"')) + '"}');
-			}
-			catch (err){
-				console.log('Error: ', err);
-			}
-		}
+
+	// options.method = method;
+
+	config.method = method;
+
+	let params;
+
+	const axiosInstance = axios.create(config);
+
+	console.log('url:', url);
+
+
+	let response;
+	if(method.toUpperCase() === 'POST' || method.toUpperCase() === 'PATCH' || method.toUpperCase() === 'PUT'){
+		config.data = JSON.parse(fns.getNodeParameter('body', 0) as string);
+		response = await axiosInstance[method](url,config.data, config).then( response => response.data).catch(error => error.response.data )
 	}
-	let body: object;
-	if(method === 'post'){
-		body = JSON.parse(fns.getNodeParameter('body', 0) as string);
+
+	if(method.toUpperCase() === 'GET' || method.toUpperCase() === 'DELETE'){
+		response = await axiosInstance[method](url, config).then( response => response.data).catch(error => error.response.data );
 	}
-	console.log('resource:', url);
-	console.log('method:', method);
-	console.log('config', config);
-	// console.log('body:', body)
 
-	const aresponse = await axios['get'](url,  config).then((response) => response.data );
 
-	console.log('aresponse:', aresponse);
-	return aresponse;
+
+	// console.log(a.json());
+	// return a;
+
+	// const aresponse = await axios['get'](url,  config).then((response) => response.data );
+
+	return response;
 	// const response = url.get();
 	// const foxySDK = require('@foxy.io/sdk');
 	// const api = new foxySDK.Backend.API
