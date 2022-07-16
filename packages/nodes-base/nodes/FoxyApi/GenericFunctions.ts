@@ -76,6 +76,7 @@ export async function freshdeskApiRequestAllItems(this: IExecuteFunctions | ILoa
 export async function handleExecute(fns: IExecuteFunctions){
 
 	const foxySDK = require('@foxy.io/sdk');
+
 	const foxyApi = new foxySDK.Backend.API({
 		refreshToken: 'UIBRufC4TmSSQYbaVCqasAQgdGhEaBzAfGJS4dIg',
 		clientSecret: 'wuwy5XRD86luAzmKvl7X65sSGL8Q9V6sxF4yF22l',
@@ -90,139 +91,32 @@ export async function handleExecute(fns: IExecuteFunctions){
 
 	type Method = 'get' | 'post' | 'delete' | 'patch' | 'put' ;
 
-	const options: Options = {
-		headers: {
-			'FOXY-API-VERSION': 1,
-			'Content-Type': 'application/json',
-		},
-	};
+	const options: Options = {};
 
 	let url = fns.getNodeParameter('url', 0) as string;
 	const method =  fns.getNodeParameter('method', 0) as Method;
+	const query = fns.getNodeParameter('query', 0, null) as string;
+	const body = fns.getNodeParameter('body', 0, null) as string;
+
 	options.method = method;
 
-	let query;
-	if(method.toUpperCase() === 'GET'){
-
-		query = fns.getNodeParameter('query', 0, null) as string;
-		if(query){
-			// config.params = JSON.parse('{"' + decodeURI(query.replace(/&/g, '\",\"').replace(/=/g,'\":\"')) + '"}');
+	if(query){
 			url += query;
-		}
 	}
-	if(method.toUpperCase() === 'POST' || method.toUpperCase() === 'PATCH' || method.toUpperCase() === 'PUT'){
+
+	if(body){
 		options.body = fns.getNodeParameter('body', 0) as string;
 	}
 
 	const foxyResponse = await foxyApi.fetch(url, options)
-	.then((response: { json: () => any; }) => response.json())
-	.then((data: any) => data);
+	.then((response: { json: () => any; }) => {
+		return response.json();
+	})
+	.then((data: any) => {
+		return data;
+	});
 
 	return foxyResponse;
-
-	// console.log(fns);
-	// const credentials = await fns.getCredentials('redis');
-	// const a = await createRedisConnection();
-	// console.log('a:', a);
-	// console.log('cred:', credentials);
-	interface OperationMap {
-		coupons: string;
-		transactions: string;
-		subscriptions: string;
-		cart: string;
-		customers: string;
-		downloadables: string;
-	}
-	const operationMap: OperationMap = {
-		coupons: 'operation',
-		transactions: 'transactionOperation',
-		subscriptions: 'subscriptionsOperation',
-		cart: 'cartOperation',
-		customers: 'customersOperation',
-		downloadables: 'downloadablesOperation',
-	};
-
-	type Headers = {
-		'FOXY-API-VERSION'?: number;
-		Authorization?: string;
-		'Content-Type'?: string;
-	};
-
-	type Config = {
-		headers?: Headers,
-		params?: object;
-		data?: object;
-		url?: string;
-		method?: string;
-	};
-
-
-
-	// const config: Config = {};
-	const headers: Headers = {
-		'FOXY-API-VERSION': 1,
-		'Authorization': 'Bearer 3f1eaee1ec9237ff8bc47be9a5705bafdb8c0fdd',
-		'Content-Type': 'application/json',
-	};
-
-	const config: AxiosRequestConfig = {};
-
-	// const options: Options = {};
-
-	// const url = fns.getNodeParameter('url', 0) as string;
-
-	config.url = url;
-	config.headers =headers;
-	// const accessToken = foxyApi.getToken();
-	// const response = await foxyApi.fetch(url, {
-	// 	method: 'GET',
-	// })
-	// return response;
-	// const operationName = operationMap[resource as keyof OperationMap];
-
-
-
-	// options.method = method;
-
-	config.method = method;
-
-	let params;
-
-	const axiosInstance = axios.create(config);
-
-	console.log('url:', url);
-
-
-	let response;
-	if(method.toUpperCase() === 'POST' || method.toUpperCase() === 'PATCH' || method.toUpperCase() === 'PUT'){
-		config.data = JSON.parse(fns.getNodeParameter('body', 0) as string);
-		response = await axiosInstance[method](url,config.data, config).then( response => response.data).catch(error => error.response.data )
-	}
-
-	if(method.toUpperCase() === 'GET' || method.toUpperCase() === 'DELETE'){
-		response = await axiosInstance[method](url, config).then( response => response.data).catch(error => error.response.data );
-	}
-
-
-
-	// console.log(a.json());
-	// return a;
-
-	// const aresponse = await axios['get'](url,  config).then((response) => response.data );
-
-	return response;
-	// const response = url.get();
-	// const foxySDK = require('@foxy.io/sdk');
-	// const api = new foxySDK.Backend.API
-	// 	.API({
-	// 	refreshToken: 'UIBRufC4TmSSQYbaVCqasAQgdGhEaBzAfGJS4dIg',
-	// 	clientSecret: 'wuwy5XRD86luAzmKvl7X65sSGL8Q9V6sxF4yF22l',
-	// 	clientId: 'client_j5Mbyv82R2BrZu67ibvw',
-	// });
-
-	// api.get()
-
-
 }
 
 async function createRedisConnection(){
@@ -261,9 +155,3 @@ console.log('settingup');
 	}
 
 }
-//
-// class testClass{
-// 	changeColor(color: any) {
-// 		console.log(color)
-// 	}
-// }
